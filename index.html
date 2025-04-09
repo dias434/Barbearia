@@ -3,14 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbearia</title>
+    <title>StudioBarbear - Barbearia Premium</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="icon.jpg">
-
+    
     <script>
         tailwind.config = {
             theme: {
+                extend: {
+                    colors: {
+                        'primary': '#d97706',
+                        'secondary': '#1f2937',
+                    }
+                },
                 screens: {
                     'xs': '475px',
                     'sm': '640px',
@@ -22,22 +28,38 @@
             }
         }
     </script>
+    <style>
+        .chatbot-message-user {
+            animation: slideInRight 0.3s ease-out;
+        }
+        .chatbot-message-bot {
+            animation: slideInLeft 0.3s ease-out;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-50 font-sans antialiased">
     <!-- Cabeçalho -->
-    <header class="bg-gray-900 text-white shadow-lg fixed w-full z-50">
+    <header class="bg-secondary text-white shadow-lg fixed w-full z-50">
         <div class="container mx-auto px-4 sm:px-6 py-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <i class="fas fa-cut text-amber-500 text-2xl sm:text-3xl mr-2"></i>
-                    <h1 class="text-xl sm:text-2xl font-bold">Studio<span class="text-amber-500">Barbear</span></h1>
+                    <i class="fas fa-cut text-primary text-2xl sm:text-3xl mr-2"></i>
+                    <h1 class="text-xl sm:text-2xl font-bold">Studio<span class="text-primary">Barbear</span></h1>
                 </div>
                 <nav class="hidden md:flex space-x-6 lg:space-x-8">
-                    <a href="#inicio" class="hover:text-amber-500 transition text-sm lg:text-base">Início</a>
-                    <a href="#servicos" class="hover:text-amber-500 transition text-sm lg:text-base">Serviços</a>
-                    <a href="#galeria" class="hover:text-amber-500 transition text-sm lg:text-base">Galeria</a>
-                    <a href="#agendamento" class="hover:text-amber-500 transition text-sm lg:text-base">Agendamento</a>
-                    <a href="#contato" class="hover:text-amber-500 transition text-sm lg:text-base">Contato</a>
+                    <a href="#inicio" class="hover:text-primary transition text-sm lg:text-base">Início</a>
+                    <a href="#servicos" class="hover:text-primary transition text-sm lg:text-base">Serviços</a>
+                    <a href="#galeria" class="hover:text-primary transition text-sm lg:text-base">Galeria</a>
+                    <a href="#equipe" class="hover:text-primary transition text-sm lg:text-base">Equipe</a>
+                    <a href="#contato" class="hover:text-primary transition text-sm lg:text-base">Contato</a>
                 </nav>
                 <button id="menuButton" class="md:hidden focus:outline-none">
                     <i class="fas fa-bars text-xl"></i>
@@ -46,11 +68,11 @@
             
             <!-- Menu Mobile -->
             <div id="mobileMenu" class="hidden md:hidden mt-4 pb-2">
-                <a href="#inicio" class="block py-2 hover:text-amber-500 transition">Início</a>
-                <a href="#servicos" class="block py-2 hover:text-amber-500 transition">Serviços</a>
-                <a href="#galeria" class="block py-2 hover:text-amber-500 transition">Galeria</a>
-                <a href="#agendamento" class="block py-2 hover:text-amber-500 transition">Agendamento</a>
-                <a href="#contato" class="block py-2 hover:text-amber-500 transition">Contato</a>
+                <a href="#inicio" class="block py-2 hover:text-primary transition">Início</a>
+                <a href="#servicos" class="block py-2 hover:text-primary transition">Serviços</a>
+                <a href="#galeria" class="block py-2 hover:text-primary transition">Galeria</a>
+                <a href="#equipe" class="block py-2 hover:text-primary transition">Equipe</a>
+                <a href="#contato" class="block py-2 hover:text-primary transition">Contato</a>
             </div>
         </div>
     </header>
@@ -58,63 +80,306 @@
     <!-- Espaço para o cabeçalho fixo -->
     <div class="h-16 sm:h-20"></div>
 
+    <!-- Botão do Chatbot Flutuante -->
+    <button id="chatbotButton" class="fixed bottom-6 right-6 bg-primary hover:bg-amber-600 text-white w-14 h-14 rounded-full shadow-xl flex items-center justify-center z-40 transition-all duration-300 hover:scale-110">
+        <i class="fas fa-comments text-2xl"></i>
+        <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75 right-1 top-1"></span>
+    </button>
+
+    <!-- Container do Chatbot -->
+    <div id="chatbotContainer" class="fixed bottom-24 right-6 w-80 bg-white rounded-lg shadow-2xl z-50 hidden flex flex-col border border-gray-200" style="height: 500px; max-height: 80vh;">
+        <!-- Cabeçalho do Chatbot -->
+        <div class="bg-secondary text-white p-4 rounded-t-lg flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-robot mr-2"></i>
+                <h3 class="font-bold">Assistente Virtual</h3>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
+                <span class="text-xs">Online</span>
+                <button id="closeChatbot" class="text-white hover:text-primary ml-2">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Área de Mensagens -->
+        <div id="chatbotMessages" class="flex-1 p-4 overflow-y-auto bg-gray-50">
+            <div class="mb-4 flex justify-start">
+                <div class="bg-gray-200 rounded-lg p-3 max-w-xs chatbot-message-bot">
+                    <p class="text-sm">Olá! Sou o assistente virtual da StudioBarbear. 😊 Posso te ajudar com:</p>
+                    <ul class="list-disc list-inside mt-1 text-xs">
+                        <li>Agendamentos</li>
+                        <li>Informações sobre serviços</li>
+                        <li>Horários de funcionamento</li>
+                        <li>Valores</li>
+                    </ul>
+                    <p class="mt-2 text-sm">Como posso te ajudar hoje?</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Área de Entrada -->
+        <div class="p-3 border-t border-gray-200 bg-white rounded-b-lg">
+            <div class="flex">
+                <input type="text" id="chatbotInput" placeholder="Digite sua mensagem..." 
+                       class="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                <button id="sendMessage" class="bg-primary hover:bg-amber-600 text-white px-4 rounded-r-lg transition">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">Exemplos: "Quero agendar um corte", "Quanto custa barba?"</p>
+        </div>
+    </div>
+
     <!-- Banner Principal -->
     <section id="inicio" class="relative h-64 sm:h-80 md:h-96 bg-[url('https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')] bg-cover bg-center flex items-center">
-        <div class="absolute inset-0 bg-black opacity-50"></div>
-        <div class="container mx-auto px-4 sm:px-6 z-10 text-white">
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+        <div class="container mx-auto px-4 sm:px-6 z-10 text-white text-center">
             <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">Estilo e Tradição</h2>
-            <p class="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8">Cortes de cabelo e barba com a qualidade que você merece</p>
-            <a href="#agendamento" class="inline-block bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg transition duration-300 text-sm sm:text-base">Agende Agora</a>
+            <p class="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 max-w-2xl mx-auto">Cortes de cabelo e barba com a qualidade premium que você merece</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-3">
+                <a href="#agendamento" class="inline-block bg-primary hover:bg-amber-600 text-gray-900 font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg transition duration-300 text-sm sm:text-base">
+                    <i class="fas fa-calendar-alt mr-2"></i>Agende Agora
+                </a>
+                <a href="#servicos" class="inline-block bg-white hover:bg-gray-100 text-secondary font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg transition duration-300 text-sm sm:text-base">
+                    <i class="fas fa-cut mr-2"></i>Nossos Serviços
+                </a>
+            </div>
         </div>
     </section>
 
     <!-- Serviços -->
     <section id="servicos" class="py-12 sm:py-16 bg-white">
         <div class="container mx-auto px-4 sm:px-6">
-            <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-800">Nossos Serviços</h2>
+            <div class="text-center mb-10">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Serviços</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-2">Nossa Carta de Cortes</h2>
+                <div class="w-16 h-1 bg-primary mx-auto mt-3"></div>
+            </div>
+            
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 <!-- Serviço 1 -->
-                <div class="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-md hover:shadow-xl transition">
-                    <div class="text-amber-500 text-3xl sm:text-4xl mb-3 sm:mb-4">
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
+                    <div class="text-primary text-4xl mb-4 flex justify-center">
                         <i class="fas fa-cut"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Corte de Cabelo</h3>
-                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Corte profissional com técnicas modernas e tradicionais para o visual perfeito.</p>
-                    <p class="text-amber-500 font-bold text-base sm:text-lg">R$ 50,00</p>
+                    <h3 class="text-xl font-semibold mb-2 text-center">Corte Clássico</h3>
+                    <p class="text-gray-600 mb-4 text-center text-sm sm:text-base">Corte profissional com técnicas modernas e tradicionais para o visual perfeito.</p>
+                    <div class="text-center">
+                        <span class="text-primary font-bold text-xl">R$ 50,00</span>
+                        <button class="ml-3 bg-primary hover:bg-amber-600 text-white text-xs py-1 px-3 rounded-full transition">Popular</button>
+                    </div>
                 </div>
                 
                 <!-- Serviço 2 -->
-                <div class="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-md hover:shadow-xl transition">
-                    <div class="text-amber-500 text-3xl sm:text-4xl mb-3 sm:mb-4">
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1">
+                    <div class="text-primary text-4xl mb-4 flex justify-center">
                         <i class="fas fa-air-freshener"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Barba Completa</h3>
-                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Aparar, modelar e hidratar sua barba para manter sempre impecável.</p>
-                    <p class="text-amber-500 font-bold text-base sm:text-lg">R$ 40,00</p>
+                    <h3 class="text-xl font-semibold mb-2 text-center">Barba Premium</h3>
+                    <p class="text-gray-600 mb-4 text-center text-sm sm:text-base">Aparar, modelar e hidratar sua barba com produtos profissionais.</p>
+                    <div class="text-center">
+                        <span class="text-primary font-bold text-xl">R$ 40,00</span>
+                    </div>
                 </div>
                 
                 <!-- Serviço 3 -->
-                <div class="bg-gray-100 p-4 sm:p-6 rounded-lg shadow-md hover:shadow-xl transition">
-                    <div class="text-amber-500 text-3xl sm:text-4xl mb-3 sm:mb-4">
+                <div class="bg-gray-50 p-6 rounded-xl shadow-md hover:shadow-xl transition transform hover:-translate-y-1 border-2 border-primary relative">
+                    <div class="absolute -top-3 -right-3 bg-primary text-white text-xs font-bold py-1 px-3 rounded-full">Oferta</div>
+                    <div class="text-primary text-4xl mb-4 flex justify-center">
                         <i class="fas fa-spa"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-semibold mb-1 sm:mb-2">Pacote Completo</h3>
-                    <p class="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">Corte de cabelo + barba completa + hidratação para um visual renovado.</p>
-                    <p class="text-amber-500 font-bold text-base sm:text-lg">R$ 100,00</p>
+                    <h3 class="text-xl font-semibold mb-2 text-center">Experiência Completa</h3>
+                    <p class="text-gray-600 mb-4 text-center text-sm sm:text-base">Corte + barba + hidratação + finalização para um visual renovado.</p>
+                    <div class="text-center">
+                        <span class="text-primary font-bold text-xl">R$ 80,00</span>
+                        <span class="ml-2 text-gray-500 text-sm line-through">R$ 90,00</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Galeria -->
-    <section id="galeria" class="py-12 sm:py-16 bg-gray-100">
+    <section id="galeria" class="py-12 sm:py-16 bg-gray-50">
         <div class="container mx-auto px-4 sm:px-6">
-            <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-800">Nossos Trabalhos</h2>
+            <div class="text-center mb-10">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Galeria</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-2">Nossos Trabalhos</h2>
+                <div class="w-16 h-1 bg-primary mx-auto mt-3"></div>
+            </div>
+            
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                <img src="https://images.unsplash.com/photo-1520338661084-680395057c93?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Corte de cabelo" class="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-md hover:scale-105 transition">
-                <img src="https://certificadocursosonline.com/wp-content/uploads/2019/09/Curso-de-cabelereiro-basico-gratis.jpg" alt="Barba" class="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-md hover:scale-105 transition">
-                <img src="https://i.pinimg.com/736x/32/09/a4/3209a4f55f956fd3f27f657ddc2e7e1c.jpg" alt="Estilo" class="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-md hover:scale-105 transition">
-                <img src="https://th.bing.com/th/id/OIP.BVhF-YvZLmMcUn6Uny64ywHaG7?rs=1&pid=ImgDetMain" alt="Navalha" class="w-full h-40 sm:h-48 md:h-56 object-cover rounded-lg shadow-md hover:scale-105 transition">
+                <div class="relative group overflow-hidden rounded-lg shadow-md">
+                    <img src="https://images.unsplash.com/photo-1520338661084-680395057c93?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" 
+                         alt="Corte de cabelo" 
+                         class="w-full h-40 sm:h-48 md:h-56 object-cover transition duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                        <span class="text-white font-medium">Corte Moderno</span>
+                    </div>
+                </div>
+                
+                <div class="relative group overflow-hidden rounded-lg shadow-md">
+                    <img src="https://certificadocursosonline.com/wp-content/uploads/2019/09/Curso-de-cabelereiro-basico-gratis.jpg" 
+                         alt="Barba" 
+                         class="w-full h-40 sm:h-48 md:h-56 object-cover transition duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                        <span class="text-white font-medium">Corte Feminino</span>
+                    </div>
+                </div>
+                
+                <div class="relative group overflow-hidden rounded-lg shadow-md">
+                    <img src="https://i.pinimg.com/736x/32/09/a4/3209a4f55f956fd3f27f657ddc2e7e1c.jpg" 
+                         alt="Estilo" 
+                         class="w-full h-40 sm:h-48 md:h-56 object-cover transition duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                        <span class="text-white font-medium">Hidratação</span>
+                    </div>
+                </div>
+                
+                <div class="relative group overflow-hidden rounded-lg shadow-md">
+                    <img src="https://th.bing.com/th/id/OIP.BVhF-YvZLmMcUn6Uny64ywHaG7?rs=1&pid=ImgDetMain" 
+                         alt="Navalha" 
+                         class="w-full h-40 sm:h-48 md:h-56 object-cover transition duration-500 group-hover:scale-110">
+                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                        <span class="text-white font-medium">Técnica Tradicional</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="#" class="inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white font-medium py-2 px-6 rounded-full transition duration-300">
+                    Ver Mais Trabalhos
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Equipe -->
+    <section id="equipe" class="py-12 sm:py-16 bg-white">
+        <div class="container mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Equipe</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-2">Nossos Barbeiros</h2>
+                <div class="w-16 h-1 bg-primary mx-auto mt-3"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Barbeiro 1 -->
+                <div class="text-center">
+                    <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary shadow-md">
+                        <img src="https://th.bing.com/th/id/R.d023882acdb0fb4df3b89ef96b5e36bc?rik=GJz1JKlYOSZRgQ&pid=ImgRaw&r=0" alt="Rafaela Silva" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Rafaela Silva</h3>
+                    <p class="text-primary font-medium mb-2">Especialista em Cortes Clássicos</p>
+                    <p class="text-gray-600 text-sm max-w-xs mx-auto">Com 10 anos de experiência, Rafa domina as técnicas tradicionais da barbearia.</p>
+                    <div class="flex justify-center space-x-2 mt-3">
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-facebook"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Barbeiro 2 -->
+                <div class="text-center">
+                    <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary shadow-md">
+                        <img src="https://randomuser.me/api/portraits/men/44.jpg" alt="Carlos Mendes" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Carlos Mendes</h3>
+                    <p class="text-primary font-medium mb-2">Mestre em Barbas</p>
+                    <p class="text-gray-600 text-sm max-w-xs mx-auto">Especializado em modelagem e cuidados com barba, Carlos transforma qualquer visual.</p>
+                    <div class="flex justify-center space-x-2 mt-3">
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-facebook"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Barbeiro 3 -->
+                <div class="text-center">
+                    <div class="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary shadow-md">
+                        <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Pedro Rocha" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Pedro Rocha</h3>
+                    <p class="text-primary font-medium mb-2">Estilista Moderno</p>
+                    <p class="text-gray-600 text-sm max-w-xs mx-auto">Pedro traz as últimas tendências internacionais para seus cortes inovadores.</p>
+                    <div class="flex justify-center space-x-2 mt-3">
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section class="py-12 sm:py-16 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6">
+            <div class="text-center mb-10">
+                <span class="text-primary font-semibold text-sm uppercase tracking-wider">Depoimentos</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mt-2">O Que Nossos Clientes Dizem</h2>
+                <div class="w-16 h-1 bg-primary mx-auto mt-3"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Depoimento 1 -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Cliente" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Marcos Oliveira</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm">"Melhor barbearia da região! A Rafa fez um trabalho incrível no meu corte, exatamente como eu queria. Ambiente limpo e profissional."</p>
+                </div>
+                
+                <!-- Depoimento 2 -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/women/43.jpg" alt="Cliente" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Ana Santos</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm">"Corto meu cabelo e hidrato há anos. Serviço consistente e de qualidade. Adoro o atendimento personalizado."</p>
+                </div>
+                
+                <!-- Depoimento 3 -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/men/65.jpg" alt="Cliente" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Ricardo Ferreira</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm">"O Carlos é um artista com a navalha! Minha barba nunca esteve tão bem cuidada. Recomendo o pacote completo, vale cada centavo."</p>
+                </div>
             </div>
         </div>
     </section>
@@ -122,81 +387,175 @@
     <!-- Agendamento -->
     <section id="agendamento" class="py-12 sm:py-16 bg-white">
         <div class="container mx-auto px-4 sm:px-6">
-            <h2 class="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-800">Agendamento</h2>
-            <div class="max-w-2xl mx-auto bg-gray-100 p-4 sm:p-6 md:p-8 rounded-lg shadow-md">
-                <form>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                        <div>
-                            <label for="nome" class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Nome Completo</label>
-                            <input type="text" id="nome" class="w-full px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm sm:text-base">
-                        </div>
-                        <div>
-                            <label for="telefone" class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Telefone</label>
-                            <input type="tel" id="telefone" class="w-full px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm sm:text-base">
-                        </div>
-                        <div>
-                            <label for="servico" class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Serviço</label>
-                            <select id="servico" class="w-full px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm sm:text-base">
-                                <option value="">Selecione um serviço</option>
-                                <option value="corte">Corte de Cabelo - R$50,00</option>
-                                <option value="barba">Barba Completa - R$40,00</option>
-                                <option value="completo">Pacote Completo - R$80,00</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="barbeiro" class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Barbeiro</label>
-                            <select id="barbeiro" class="w-full px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm sm:text-base">
-                                <option value="">Qualquer barbeiro</option>
-                                <option value="joao">João</option>
-                                <option value="marcos">Marcos</option>
-                                <option value="pedro">Pedro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="data" class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Data</label>
-                            <input type="date" id="data" class="w-full px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm sm:text-base">
-                        </div>
-                        <div>
-                            <label for="hora" class="block text-gray-700 mb-1 sm:mb-2 text-sm sm:text-base">Hora</label>
-                            <input type="time" id="hora" class="w-full px-3 py-2 sm:px-4 sm:py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm sm:text-base">
+            <div class="max-w-4xl mx-auto bg-gradient-to-r from-secondary to-gray-800 rounded-xl shadow-xl overflow-hidden">
+                <div class="md:flex">
+                    <div class="md:w-1/2 bg-[url('https://images.unsplash.com/photo-1585747860715-2ba9076f1cb6?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60')] bg-cover bg-center hidden md:block">
+                        <div class="h-full bg-black bg-opacity-40 flex items-center justify-center p-8">
+                            <div class="text-white text-center">
+                                <h3 class="text-2xl font-bold mb-3">Agende Seu Horário</h3>
+                                <p class="mb-5">Nossa equipe está pronta para te atender com excelência</p>
+                                <div class="flex items-center justify-center space-x-4">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold">10+</div>
+                                        <div class="text-xs">Anos de Experiência</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold">5k+</div>
+                                        <div class="text-xs">Clientes Satisfeitos</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-4 sm:mt-6">
-                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-2 px-4 sm:py-3 sm:px-6 rounded-lg transition duration-300 text-sm sm:text-base">Confirmar Agendamento</button>
+                    
+                    <div class="md:w-1/2 p-6 sm:p-8">
+                        <div class="text-center mb-6">
+                            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Faça seu Agendamento</h2>
+                            <p class="text-gray-600 mt-2 text-sm">Preencha o formulário abaixo e entraremos em contato para confirmar</p>
+                        </div>
+                        
+                        <form id="agendamentoForm" class="space-y-4">
+                            <div>
+                                <label for="nome" class="block text-gray-700 text-sm font-medium mb-1">Nome Completo*</label>
+                                <input type="text" id="nome" required 
+                                       class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="telefone" class="block text-gray-700 text-sm font-medium mb-1">Telefone*</label>
+                                    <input type="tel" id="telefone" required 
+                                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-gray-700 text-sm font-medium mb-1">Email</label>
+                                    <input type="email" id="email" 
+                                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="servico" class="block text-gray-700 text-sm font-medium mb-1">Serviço*</label>
+                                    <select id="servico" required 
+                                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                                        <option value="">Selecione...</option>
+                                        <option value="corte">Corte de Cabelo - R$50,00</option>
+                                        <option value="barba">Barba Completa - R$40,00</option>
+                                        <option value="completo">Pacote Completo - R$80,00</option>
+                                        <option value="outro">Outro Serviço</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="barbeiro" class="block text-gray-700 text-sm font-medium mb-1">Barbeiro Preferido</label>
+                                    <select id="barbeiro" 
+                                            class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                                        <option value="">Qualquer um</option>
+                                        <option value="joao">Rafaela Silva</option>
+                                        <option value="carlos">Carlos Mendes</option>
+                                        <option value="pedro">Pedro Rocha</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="data" class="block text-gray-700 text-sm font-medium mb-1">Data*</label>
+                                    <input type="date" id="data" required 
+                                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                                </div>
+                                <div>
+                                    <label for="hora" class="block text-gray-700 text-sm font-medium mb-1">Horário*</label>
+                                    <input type="time" id="hora" required 
+                                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary text-sm">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="mensagem" class="block text-gray-700 text-sm font-medium mb-1">Mensagem/Observações</label>
+                                <textarea id="mensagem" rows="3" 
+                                          class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary text-sm"></textarea>
+                            </div>
+                            
+                            <button type="submit" 
+                                    class="w-full bg-primary hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                                <i class="fas fa-calendar-check mr-2"></i> Confirmar Agendamento
+                            </button>
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Rodapé -->
-    <footer id="contato" class="bg-gray-900 text-white py-8 sm:py-12">
+    <footer id="contato" class="bg-secondary text-white py-12">
         <div class="container mx-auto px-4 sm:px-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
-                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-4">StudioBarbear</h3>
-                    <p class="text-gray-400 text-sm sm:text-base">Oferecendo serviços de qualidade desde 2010. Tradição e modernidade para o seu visual.</p>
-                </div>
-                <div>
-                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-4">Horário de Funcionamento</h3>
-                    <p class="text-gray-400 text-sm sm:text-base">Seg-Sex: 9:00 - 19:00</p>
-                    <p class="text-gray-400 text-sm sm:text-base">Sábado: 9:00 - 17:00</p>
-                    <p class="text-gray-400 text-sm sm:text-base">Domingo: Fechado</p>
-                </div>
-                <div>
-                    <h3 class="text-lg sm:text-xl font-bold mb-2 sm:mb-4">Contato</h3>
-                    <p class="text-gray-400 mb-1 sm:mb-2 text-sm sm:text-base"><i class="fas fa-map-marker-alt mr-2"></i> Rua da Barbearia, 123 - Centro</p>
-                    <p class="text-gray-400 mb-1 sm:mb-2 text-sm sm:text-base"><i class="fas fa-phone mr-2"></i> (11) 9999-9999</p>
-                    <p class="text-gray-400 text-sm sm:text-base"><i class="fas fa-envelope mr-2"></i> contato@studiobarbear.com</p>
-                    <div class="flex space-x-3 sm:space-x-4 mt-2 sm:mt-4">
-                        <a href="#" class="text-gray-400 hover:text-amber-500 text-sm sm:text-base"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-amber-500 text-sm sm:text-base"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-amber-500 text-sm sm:text-base"><i class="fab fa-whatsapp"></i></a>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-cut text-primary mr-2"></i>
+                        <span>Studio<span class="text-primary">Barbear</span></span>
+                    </h3>
+                    <p class="text-gray-400 text-sm">Oferecendo serviços de qualidade desde 2012. Tradição e modernidade para o seu visual.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-primary transition"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Links Rápidos</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#inicio" class="text-gray-400 hover:text-primary transition text-sm">Início</a></li>
+                        <li><a href="#servicos" class="text-gray-400 hover:text-primary transition text-sm">Serviços</a></li>
+                        <li><a href="#galeria" class="text-gray-400 hover:text-primary transition text-sm">Galeria</a></li>
+                        <li><a href="#equipe" class="text-gray-400 hover:text-primary transition text-sm">Equipe</a></li>
+                        <li><a href="#agendamento" class="text-gray-400 hover:text-primary transition text-sm">Agendamento</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Horário</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li class="flex items-center">
+                            <span class="w-24">Segunda-Sexta</span>
+                            <span>9:00 - 19:00</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-24">Sábado</span>
+                            <span>9:00 - 17:00</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-24">Domingo</span>
+                            <span>Fechado</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Contato</h3>
+                    <ul class="space-y-3 text-gray-400 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-3 text-primary"></i>
+                            <span>Rua das Barbearias, 123 - Centro, São Paulo/SP</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-phone-alt mr-3 text-primary"></i>
+                            <span>(11) 9999-9999</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-3 text-primary"></i>
+                            <span>contato@studiobarbear.com</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="border-t border-gray-800 mt-6 sm:mt-8 pt-6 sm:pt-8 text-center text-gray-400 text-sm sm:text-base">
+            
+            <div class="border-t border-gray-800 mt-10 pt-6 text-center text-gray-400 text-sm">
                 <p>&copy; 2023 StudioBarbear. Todos os direitos reservados.</p>
+                <p class="mt-1">Desenvolvido com <i class="fas fa-heart text-red-500"></i> por sua barbearia favorita</p>
             </div>
         </div>
     </footer>
@@ -210,19 +569,171 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // Validação do formulário
-        document.querySelector('form').addEventListener('submit', function(e) {
+        // Chatbot Implementation
+        const chatbotButton = document.getElementById('chatbotButton');
+        const chatbotContainer = document.getElementById('chatbotContainer');
+        const closeChatbot = document.getElementById('closeChatbot');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const sendMessage = document.getElementById('sendMessage');
+
+        // Abrir/fechar chatbot
+        chatbotButton.addEventListener('click', function() {
+            chatbotContainer.classList.toggle('hidden');
+            chatbotButton.classList.toggle('bg-primary');
+            chatbotButton.classList.toggle('bg-gray-600');
+        });
+
+        closeChatbot.addEventListener('click', function() {
+            chatbotContainer.classList.add('hidden');
+            chatbotButton.classList.remove('bg-gray-600');
+            chatbotButton.classList.add('bg-primary');
+        });
+
+        // Enviar mensagem ao pressionar Enter
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendUserMessage();
+            }
+        });
+
+        // Enviar mensagem ao clicar no botão
+        sendMessage.addEventListener('click', sendUserMessage);
+
+        function sendUserMessage() {
+            const message = chatbotInput.value.trim();
+            if (message === '') return;
+
+            // Adiciona mensagem do usuário
+            addMessage(message, 'user');
+            chatbotInput.value = '';
+
+            // Simula resposta do bot (na implementação real, aqui você integraria com Dialogflow)
+            setTimeout(() => {
+                const botResponse = generateBotResponse(message);
+                addMessage(botResponse, 'bot');
+            }, 500);
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `mb-4 flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = sender === 'user' 
+                ? 'bg-primary text-white rounded-lg p-3 max-w-xs chatbot-message-user'
+                : 'bg-gray-200 rounded-lg p-3 max-w-xs chatbot-message-bot';
+            
+            messageContent.innerHTML = `<p class="text-sm">${text}</p>`;
+            messageDiv.appendChild(messageContent);
+            
+            chatbotMessages.appendChild(messageDiv);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        function generateBotResponse(userMessage) {
+            userMessage = userMessage.toLowerCase();
+            
+            if (userMessage.includes('agendar') || userMessage.includes('marcar') || userMessage.includes('horário')) {
+                return `Para agendar um horário, você pode:
+                1. Usar nosso <a href="#agendamento" class="text-primary underline">formulário de agendamento</a>
+                2. Nos chamar no WhatsApp: <a href="https://wa.me/5511999999999" class="text-primary underline">(11) 99999-9999</a>
+                3. Me dizer qual serviço deseja (corte, barba ou completo) e data preferencial que verifico a disponibilidade!`;
+            } 
+            else if (userMessage.includes('preço') || userMessage.includes('valor') || userMessage.includes('custa')) {
+                return `Nossos preços são:
+                ✂️ Corte de Cabelo: R$50,00
+                🧔 Barba Completa: R$40,00
+                ✨ Pacote Completo: R$80,00 (economiza R$10)
+                
+                Todos os serviços incluem uma bebida cortesia! Quer agendar algum?`;
+            }
+            else if (userMessage.includes('horário') || userMessage.includes('funcionamento') || userMessage.includes('aberto')) {
+                return `⏰ Funcionamos:
+                - Segunda a Sexta: 9h às 19h
+                - Sábado: 9h às 17h
+                - Domingo: Fechado
+                
+                Temos horários especiais na véspera de feriados.`;
+            }
+            else if (userMessage.includes('corte') || userMessage.includes('cabelo')) {
+                return `✂️ O corte de cabelo inclui:
+                - Lavagem profissional
+                - Corte com técnicas atualizadas
+                - Estilização e finalização
+                - Bebida cortesia
+                
+                Valor: R$50,00
+                Duração: ~40 minutos
+                
+                Quer agendar para quando?`;
+            }
+            else if (userMessage.includes('barba')) {
+                return `🧔 O serviço de barba inclui:
+                - Aparar e modelar
+                - Hidratação profissional
+                - Massagem facial
+                - Bebida cortesia
+                
+                Valor: R$40,00
+                Duração: ~30 minutos
+                
+                Posso te ajudar a agendar?`;
+            }
+            else if (userMessage.includes('completo') || userMessage.includes('pacote')) {
+                return `✨ O pacote completo inclui:
+                - Corte de cabelo
+                - Serviço de barba
+                - Hidratação premium
+                - Bebida cortesia
+                
+                Valor: R$80,00 (economiza R$10)
+                Duração: ~1h15min
+                
+                É nosso serviço mais pedido! Qual dia seria melhor para você?`;
+            }
+            else if (userMessage.includes('ola') || userMessage.includes('oi') || userMessage.includes('olá')) {
+                return `Olá! 😊 Sou o assistente virtual da StudioBarbear. Posso te ajudar com:
+                - Agendamentos
+                - Informações sobre serviços
+                - Valores
+                - Horários de funcionamento
+                
+                Como posso te ajudar hoje?`;
+            }
+            else {
+                return `🤔 Desculpe, não entendi completamente. Posso te ajudar com:
+                - Agendamentos (corte, barba ou completo)
+                - Informações sobre serviços
+                - Valores
+                - Horários de funcionamento
+                
+                O que você gostaria de saber?`;
+            }
+        }
+
+        // Formulário de Agendamento
+        const agendamentoForm = document.getElementById('agendamentoForm');
+        agendamentoForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Validação simples
             const nome = document.getElementById('nome').value;
+            const telefone = document.getElementById('telefone').value;
             const servico = document.getElementById('servico').value;
             const data = document.getElementById('data').value;
+            const hora = document.getElementById('hora').value;
             
-            if(nome && servico && data) {
-                alert('Agendamento realizado com sucesso! Entraremos em contato para confirmar.');
-                this.reset();
-            } else {
+            if(!nome || !telefone || !servico || !data || !hora) {
                 alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
             }
+            
+            // Simulação de envio
+            alert(`Agendamento solicitado com sucesso!\n\n${nome}, entraremos em contato no telefone ${telefone} para confirmar seu horário para ${servico} no dia ${data} às ${hora}.`);
+            
+            // Limpa o formulário
+            agendamentoForm.reset();
         });
 
         // Suavizar rolagem para âncoras
@@ -238,6 +749,15 @@
                 });
             });
         });
+
+        // Data mínima para agendamento (amanhã)
+        const dataInput = document.getElementById('data');
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dd = String(tomorrow.getDate()).padStart(2, '0');
+        const mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        const yyyy = tomorrow.getFullYear();
+        dataInput.min = `${yyyy}-${mm}-${dd}`;
     </script>
 </body>
 </html>
